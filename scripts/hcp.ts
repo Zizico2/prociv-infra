@@ -61,4 +61,5 @@ export async function workspace(
     "local",
     `${name}: set execution mode to Local before using this pipeline`,
   );
+  return data.data.attributes;
 }
