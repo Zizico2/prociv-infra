@@ -32,7 +32,7 @@ Compose publishes 50101/50102 on loopback. Override local bindings with `PROCIV_
 
 `providers/cloud-run/bootstrap` configures Artifact Registry, build/deploy/runtime identities and repository/workflow/branch-scoped GitHub OIDC. `providers/cloud-run/app` deploys the two immutable image digests in Madrid by default, one vCPU/512 MiB each, minimum zero and maximum two instances per service. The public API is unauthenticated. Existing organization policy must permit public invokers. Runtime data and cache are disposable. No load balancer, NAT, database or remote cache is provisioned.
 
-Cloud resources have not been provisioned by this repository's creation. To release:
+The dedicated deployment foundation is now provisioned; [deployment identifiers](docs/deployment.md) record the project, state workspaces and Vercel project. Application services are created only after workflow approval. To release:
 
 1. Choose a billing-enabled GCP project and an HCP Terraform organization. Create `prociv-bootstrap`, `prociv-staging`, `prociv-production` workspaces in Local execution mode (`rtk npm run hcp:setup`, with normal Terraform credentials outside the repository).
 2. Apply bootstrap deliberately with project_id and immutable numeric github_repository_id. Backend organization/workspace settings are supplied at init time by HCP/TF_WORKSPACE, as in IPMA.
