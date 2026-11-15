@@ -1,0 +1,13 @@
+name: Verify
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: cachix/install-nix-action@91f6a0f59e94dfb2cfed0f4000f36a68ead1d20c
+      - run: nix develop --command npm ci --ignore-scripts
+      - run: nix develop --command just verify
+      - run: nix develop --command just terraform-check

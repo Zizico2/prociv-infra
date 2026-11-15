@@ -1,0 +1,10 @@
+**
+!containers/
+!containers/entrypoint.sh
+!.sources/
+!.sources/prociv-proxy/
+!.sources/prociv-proxy/**
+!.sources/prociv-gateway/
+!.sources/prociv-gateway/**
+.sources/**/.git
+.sources/**/target

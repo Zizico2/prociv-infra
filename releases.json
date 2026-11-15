@@ -1,0 +1,22 @@
+{
+  "prociv-proxy": {
+    "repository": "https://github.com/Zizico2/prociv-proxy.git",
+    "revision": "96a8845959efb728972ae160ca3de8d70db43cf0"
+  },
+  "prociv-gateway": {
+    "repository": "https://github.com/Zizico2/prociv-gateway.git",
+    "revision": "d6759b045992df43dc8141c96081fa09155ebcd7"
+  },
+  "prociv-proto": {
+    "repository": "https://github.com/Zizico2/prociv-proto.git",
+    "revision": "232512bfe929eaa3ef4cefc18713c25f230913de"
+  },
+  "prociv-openapi": {
+    "repository": "https://github.com/Zizico2/prociv-openapi.git",
+    "revision": "e8508bea794b02783c4bdc402dd9ebbbf6ff970d"
+  },
+  "prociv-app": {
+    "repository": "https://github.com/Zizico2/prociv-app.git",
+    "revision": "d645dafbe8d466387cc30ec6453d6e324841bbad"
+  }
+}

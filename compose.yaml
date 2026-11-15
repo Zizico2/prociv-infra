@@ -1,0 +1,37 @@
+services:
+  adapter:
+    platform: linux/amd64
+    image: prociv-proxy:local
+    build:
+      context: .
+      dockerfile: containers/Dockerfile
+      args:
+        SERVICE: prociv-proxy
+        SOURCE_REVISION: ${ADAPTER_REVISION}
+    ports: ["127.0.0.1:${PROCIV_ADAPTER_PORT:-50101}:8080"]
+    environment:
+      RUST_LOG: prociv_proxy=info,prociv_service=info
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    init: true
+  gateway:
+    platform: linux/amd64
+    image: prociv-gateway:local
+    build:
+      context: .
+      dockerfile: containers/Dockerfile
+      args:
+        SERVICE: prociv-gateway
+        SOURCE_REVISION: ${GATEWAY_REVISION}
+    ports: ["127.0.0.1:${PROCIV_GATEWAY_PORT:-50102}:8080"]
+    environment:
+      PROCIV_GATEWAY_UPSTREAM_ADDRESS: http://adapter:8080
+      PROCIV_GATEWAY_CACHE_MIB: "64"
+      PROCIV_GATEWAY_CACHE_NEUTRAL_METADATA: x-forwarded-for,x-forwarded-proto,x-forwarded-host,forwarded,x-cloud-trace-context,traceparent,tracestate
+      RUST_LOG: prociv_gateway=info,prociv_gateway_core=info
+    depends_on: [adapter]
+    restart: on-failure:3
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]

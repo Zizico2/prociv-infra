@@ -1,0 +1,104 @@
+name: Deploy Vercel app
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Environment to deploy (review the saved build before approval)
+        required: true
+        type: choice
+        options: [staging, production]
+permissions:
+  contents: read
+concurrency:
+  group: vercel-app-${{ inputs.environment }}
+  cancel-in-progress: false
+env:
+  DEPLOY_ENVIRONMENT: ${{ inputs.environment }}
+  VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
+jobs:
+  build:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 24
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+        with:
+          bun-version: 1.4.4
+      - run: npm ci --ignore-scripts
+      - run: npm run check
+      - run: npm run fmt:check
+      - name: Read the pinned app revision
+        id: app
+        run: echo "revision=$(jq -r '."prociv-app".revision' releases.json)" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: Zizico2/prociv-app
+          ref: ${{ steps.app.outputs.revision }}
+          path: .sources/prociv-app
+          persist-credentials: false
+      - run: bun install --frozen-lockfile
+        working-directory: .sources/prociv-app
+      - name: Build the pinned app once for review and deployment
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: npm run vercel:build
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: vercel-app-build
+          path: .artifacts/vercel/
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 3
+  deploy:
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    environment:
+      name: ${{ inputs.environment }}
+      url: ${{ steps.deploy.outputs.deployment_url }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 24
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+        with:
+          bun-version: 1.4.4
+      - run: npm ci --ignore-scripts
+      - name: Read the pinned app revision
+        id: app
+        run: echo "revision=$(jq -r '."prociv-app".revision' releases.json)" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: Zizico2/prociv-app
+          ref: ${{ steps.app.outputs.revision }}
+          path: .sources/prociv-app
+          persist-credentials: false
+      - run: bun install --frozen-lockfile
+        working-directory: .sources/prociv-app
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: vercel-app-build
+          path: .artifacts/vercel/
+      - name: Deploy the reviewed app build without rebuilding
+        id: deploy
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: npm run vercel:deploy
+      - name: Verify the deployed app
+        env:
+          DEPLOYED_TEST_URL: ${{ steps.deploy.outputs.deployment_url }}
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+        working-directory: .sources/prociv-app
+        run: |
+          bunx playwright install chromium
+          bun run test:e2e:deployed
