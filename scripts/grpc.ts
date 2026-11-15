@@ -10,10 +10,13 @@ import {
 
 export type Data = Record<string, unknown>;
 
-export function client(endpoint: string) {
+export function client(
+  endpoint: string,
+  directory = ".sources/prociv-proto/proto",
+) {
   const schema = {
     file: "prociv/v1/occurrences.proto",
-    directory: ".sources/prociv-proto/proto",
+    directory,
     service: "prociv.v1.OccurrencesService",
   };
   const url = new URL(endpoint);

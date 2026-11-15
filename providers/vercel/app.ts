@@ -145,6 +145,9 @@ function main() {
   } else {
     const saved = JSON.parse(readFileSync(manifest, "utf8"));
     const upstreamUrl = verifyRelease(saved, expected, archive);
+    execFileSync(process.execPath, ["scripts/wait-backend.ts", upstreamUrl], {
+      stdio: "inherit",
+    });
     execFileSync("tar", ["-xzf", archive], { cwd: app, stdio: "inherit" });
     const url = vercel(
       [
