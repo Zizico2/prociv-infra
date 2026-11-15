@@ -36,7 +36,7 @@ The dedicated deployment foundation is now provisioned; [deployment identifiers]
 
 1. Choose a billing-enabled GCP project and an HCP Terraform organization. Create `prociv-bootstrap`, `prociv-staging`, `prociv-production` workspaces in Local execution mode (`rtk npm run hcp:setup`, with normal Terraform credentials outside the repository).
 2. Apply bootstrap deliberately with project_id and immutable numeric github_repository_id. Backend organization/workspace settings are supplied at init time by HCP/TF_WORKSPACE, as in IPMA.
-3. Configure repository variables `GCP_PROJECT_ID`, `GCP_REGION`, `TF_CLOUD_ORGANIZATION`, `GCP_WORKLOAD_IDENTITY_PROVIDER`, `GCP_BUILD_SERVICE_ACCOUNT`, `GCP_DEPLOY_SERVICE_ACCOUNT`; set `TF_API_TOKEN` privately in GitHub Actions.
+3. Configure repository variables `GCP_PROJECT_ID`, `GCP_REGION`, `TF_CLOUD_ORGANIZATION`, `GCP_WORKLOAD_IDENTITY_PROVIDER`, `GCP_BUILD_SERVICE_ACCOUNT`, `GCP_DEPLOY_SERVICE_ACCOUNT`; set `TF_API_TOKEN` privately in GitHub Actions. Use an HCP user or team token with state read/write and lock/unlock access to both environment workspaces. Organization tokens cannot perform these state operations. The workflow checks these permissions before building images.
 4. Run `rtk npm run github:setup` to create staging/production reviewer gates limited to main. Environments reject administrator bypass; the owner can review the saved plan.
 5. Manually dispatch **Deploy Cloud Run** from main. It verifies code, builds and smoke-tests containers, publishes immutable images, saves the Terraform binary plan and readable diff, and waits for the selected environment's review. Apply uses that exact artifact, then checks both deployed gRPC endpoints.
 
