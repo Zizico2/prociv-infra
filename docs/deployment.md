@@ -2,7 +2,7 @@
 
 Prociv uses the dedicated Google Cloud project `prociv-proxy-zizico2` (number `153694727013`), with billing linked to the same account as IPMA. Its Artifact Registry and native HTTP/2 Cloud Run services use `europe-southwest1` (Madrid). IPMA resources are managed separately.
 
-Bootstrap was applied to the HCP Terraform organization `ipma-proxy`, workspace `prociv-bootstrap`. Staging and production have separate empty state workspaces `prociv-staging` and `prociv-production`. Runtime identities, the `prociv` registry and repository-scoped GitHub OIDC trust are ready. No application service is created by bootstrap.
+Bootstrap state is held in the HCP Terraform organization `prociv-proxy`, workspace `prociv-bootstrap`. Staging and production have separate empty state workspaces `prociv-staging` and `prociv-production`. Runtime identities, the `prociv` registry and repository-scoped GitHub OIDC trust are ready. No application service is created by bootstrap. The original bootstrap state copy in the IPMA organization was backed up and locked during the organization migration.
 
 Vercel project `prociv-app` is `prj_4YvbCAbxCsrdKeR70sKHhjIGxkkb` in team `team_Em7GNLb8UiXwORrcERbfy9rh`. Node.js is 24. The app uses Vercel's default function region, matching IPMA; `mad1` is not a supported Vercel function region. The Preview gateway origin is configured for the future staging service and Production uses its own future production origin.
 
